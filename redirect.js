@@ -4,12 +4,10 @@
 
   console.log("📩 Data da URL:", raw);
 
-  // Se non c'è 'start' nell'URL, prova da localStorage
   if (!raw) {
     raw = localStorage.getItem("start_data_offerta");
     console.log("💾 Data da localStorage:", raw);
   } else {
-    // Se arriva dall'URL e non c'è ancora in localStorage, salvalo
     if (!localStorage.getItem("start_data_offerta")) {
       localStorage.setItem("start_data_offerta", raw);
       console.log("✅ Data salvata in localStorage:", raw);
@@ -23,10 +21,7 @@
     return;
   }
 
-  // Pulizia formato (es. rimuove 'th', 'st', ecc. se presenti)
   const cleaned = raw.replace(/(\d+)(st|nd|rd|th)/, '$1');
-
-  // Parsing della data
   const parsedDate = new Date(cleaned);
   if (isNaN(parsedDate.getTime())) {
     console.error("❌ Data non valida:", cleaned);
