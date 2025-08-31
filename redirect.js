@@ -1,17 +1,27 @@
 (function () {
-  const dataInizio = "{{ contact.custom_fields.data_inizio_offerta }}";
-  console.log("DATA INIZIO OFFERTA:", dataInizio);
+  const raw = "{{ contact.custom_fields.data_inizio_offerta }}";
+  console.log("🧪 DATA GREZZA:", raw);
 
-  if (!dataInizio || dataInizio.trim() === "") {
-    console.warn("❌ Merge field vuoto: contatto non identificato");
+  if (!raw || raw.includes("{{")) {
+    console.warn("❌ Campo vuoto o merge field non interpretato");
     return;
   }
 
-  const start = new Date(dataInizio);
-  const now = new Date();
-  const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  // Rimuove 'st', 'nd', 'rd', 'th' dai giorni
+  const cleaned = raw.replace(/(\d+)(st|nd|rd|th)/, '$1');
+  const parsedDate = new Date(cleaned);
 
-  console.log("📆 Giorni passati:", diff);
+  console.log("📆 DATA PARSATA:", parsedDate);
+
+  if (isNaN(parsedDate.getTime())) {
+    console.error("❌ Data non valida anche dopo la pulizia:", cleaned);
+    return;
+  }
+
+  const now = new Date();
+  const diff = Math.floor((now - parsedDate) / (1000 * 60 * 60 * 24));
+
+  console.log("📅 Giorni passati:", diff);
 
   if (diff > 7) {
     console.log("⏳ Offerta scaduta, redirect in corso...");
