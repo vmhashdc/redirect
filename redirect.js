@@ -1,42 +1,30 @@
 (function () {
+  // Estrai la data dall'URL o dal localStorage
   const urlParams = new URLSearchParams(window.location.search);
-  let raw = urlParams.get("start");
+  let raw = urlParams.get("start") || localStorage.getItem("start_data_offerta");
+  if (!raw) return;
 
-  console.log("📩 Data da URL:", raw);
-
-  if (!raw) {
-    raw = localStorage.getItem("start_data_offerta");
-    console.log("💾 Data da localStorage:", raw);
-  } else {
-    if (!localStorage.getItem("start_data_offerta")) {
-      localStorage.setItem("start_data_offerta", raw);
-      console.log("✅ Data salvata in localStorage:", raw);
-    } else {
-      console.log("⚠️ LocalStorage già presente, non sovrascrivo.");
-    }
+  // Salva in localStorage se non c'è già
+  if (!localStorage.getItem("start_data_offerta")) {
+    localStorage.setItem("start_data_offerta", raw);
   }
 
-  if (!raw) {
-    console.warn("❌ Nessuna data trovata. Nessun redirect.");
-    return;
-  }
-
+  // Pulisci e converte la data
   const cleaned = raw.replace(/(\d+)(st|nd|rd|th)/, '$1');
   const parsedDate = new Date(cleaned);
-  if (isNaN(parsedDate.getTime())) {
-    console.error("❌ Data non valida:", cleaned);
-    return;
-  }
+  if (isNaN(parsedDate.getTime())) return;
 
+  // Calcola giorni passati
   const now = new Date();
   const diff = Math.floor((now - parsedDate) / (1000 * 60 * 60 * 24));
 
-  console.log("📅 Giorni passati:", diff);
-
+  // Redirect se > 7 giorni
   if (diff > 7) {
-    console.warn("⏳ Offerta scaduta. Redirect a prezzo pieno.");
-    window.location.href = "https://notaxstrategy.com/taxconsultation197";
-  } else {
-    console.log("✅ Offerta ancora valida");
+    // Schermata nera istantanea per confondere eventuali "click su X"
+    document.body.innerHTML = '';
+    document.body.style.backgroundColor = '#000';
+
+    // Redirect immediato e senza cronologia
+    window.location.replace("https://notaxstrategy.com/taxconsultation197");
   }
 })();
