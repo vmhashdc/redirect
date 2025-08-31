@@ -1,20 +1,35 @@
 (function () {
-  const raw = "{{ contact.custom_fields.data_inizio_offerta }}";
-  console.log("🧪 DATA GREZZA:", raw);
+  const urlParams = new URLSearchParams(window.location.search);
+  let raw = urlParams.get("start");
 
-  if (!raw || raw.includes("{{")) {
-    console.warn("❌ Campo vuoto o merge field non interpretato");
+  console.log("📩 Data da URL:", raw);
+
+  // Se non c'è 'start' nell'URL, prova da localStorage
+  if (!raw) {
+    raw = localStorage.getItem("start_data_offerta");
+    console.log("💾 Data da localStorage:", raw);
+  } else {
+    // Se arriva dall'URL e non c'è ancora in localStorage, salvalo
+    if (!localStorage.getItem("start_data_offerta")) {
+      localStorage.setItem("start_data_offerta", raw);
+      console.log("✅ Data salvata in localStorage:", raw);
+    } else {
+      console.log("⚠️ LocalStorage già presente, non sovrascrivo.");
+    }
+  }
+
+  if (!raw) {
+    console.warn("❌ Nessuna data trovata. Nessun redirect.");
     return;
   }
 
-  // Rimuove 'st', 'nd', 'rd', 'th' dai giorni
+  // Pulizia formato (es. rimuove 'th', 'st', ecc. se presenti)
   const cleaned = raw.replace(/(\d+)(st|nd|rd|th)/, '$1');
+
+  // Parsing della data
   const parsedDate = new Date(cleaned);
-
-  console.log("📆 DATA PARSATA:", parsedDate);
-
   if (isNaN(parsedDate.getTime())) {
-    console.error("❌ Data non valida anche dopo la pulizia:", cleaned);
+    console.error("❌ Data non valida:", cleaned);
     return;
   }
 
@@ -24,7 +39,7 @@
   console.log("📅 Giorni passati:", diff);
 
   if (diff > 7) {
-    console.log("⏳ Offerta scaduta, redirect in corso...");
+    console.warn("⏳ Offerta scaduta. Redirect a prezzo pieno.");
     window.location.href = "https://notaxstrategy.com/taxconsultation197";
   } else {
     console.log("✅ Offerta ancora valida");
